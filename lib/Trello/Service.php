@@ -109,132 +109,22 @@ class Service extends Manager
         $data      = $action['data'];
 
         switch ($eventName) {
-            case Events::BOARD_CREATE:
-            case Events::BOARD_UPDATE:
-            case Events::BOARD_COPY:
-                $event = new Event\BoardEvent();
-                $event->setBoard($this->getBoard($data['board']['id']));
-                break;
-            case Events::BOARD_MOVE_CARD_FROM:
-            case Events::BOARD_MOVE_CARD_TO:
-                $event = new Event\CardMoveEvent();
-                $event->setCard($this->getCard($data['card']['id']));
-                break;
-            case Events::BOARD_MOVE_LIST_FROM:
-            case Events::BOARD_MOVE_LIST_TO:
-                $event = new Event\ListMoveEvent();
-                $event->setList($this->getList($data['list']['id']));
-                break;
-            case Events::BOARD_ADD_MEMBER:
-            case Events::BOARD_MAKE_ADMIN:
-            case Events::BOARD_MAKE_NORMAL_MEMBER:
-            case Events::BOARD_MAKE_OBSERVER:
-            case Events::BOARD_REMOVE_ADMIN:
-            case Events::BOARD_DELETE_INVITATION:
-            case Events::BOARD_UNCONFIRMED_INVITATION:
-                $event = new Event\BoardMemberEvent();
-                $event->setBoard($this->getBoard($data['board']['id']));
-                $event->setMember($this->getMember($data['member']['id']));
-                break;
-            case Events::BOARD_ADD_TO_ORGANIZATION:
-            case Events::BOARD_REMOVE_FROM_ORGANIZATION:
-                $event = new Event\BoardOrganizationEvent();
-                $event->setBoard($this->getBoard($data['board']['id']));
-                $event->setOrganization($this->getOrganization($data['organization']['id']));
-                break;
-            case Events::LIST_CREATE:
-            case Events::LIST_UPDATE:
-            case Events::LIST_UPDATE_CLOSED:
-            case Events::LIST_UPDATE_NAME:
-                $event = new Event\ListEvent();
-                $event->setList($this->getList($data['list']['id']));
-                break;
-            case Events::CARD_CREATE:
             case Events::CARD_UPDATE:
-            case Events::CARD_UPDATE_LIST:
-            case Events::CARD_UPDATE_NAME:
-            case Events::CARD_UPDATE_DESC:
-            case Events::CARD_UPDATE_CLOSED:
-            case Events::CARD_DELETE:
-            case Events::CARD_EMAIL:
-            case Events::CARD_ADD_LABEL:
-            case Events::CARD_REMOVE_LABEL:
                 $event = new Event\CardEvent();
                 $event->setCard($this->getCard($data['card']['id']));
                 break;
-            case Events::CARD_COPY:
-                $event = new Event\CardCopyEvent();
-                $event->setCard($this->getCard($data['card']['id']));
-                break;
             case Events::CARD_ADD_MEMBER:
-            case Events::CARD_REMOVE_MEMBER:
                 $event = new Event\CardMemberEvent();
                 $event->setCard($this->getCard($data['card']['id']));
                 $event->setMember($this->getMember($data['idMember']));
                 break;
-            case Events::CARD_COMMENT:
-            case Events::CARD_COPY_COMMENT:
-                $event = new Event\CardCommentEvent();
-                $event->setCard($this->getCard($data['card']['id']));
-                $event->setComment($data['text']);
-                break;
-            case Events::CARD_FROM_CHECKITEM:
-                $event = new Event\CardFromCheckItemEvent();
-                $event->setCard($this->getCard($data['card']['id']));
-                break;
-            case Events::CARD_ADD_ATTACHMENT:
-            case Events::CARD_DELETE_ATTACHMENT:
-                $event = new Event\CardAttachmentEvent();
-                $event->setCard($this->getCard($data['card']['id']));
-                $event->setAttachment($data['attachment']);
-                break;
-            case Events::CARD_ADD_CHECKLIST:
-            case Events::CARD_CREATE_CHECKLIST_ITEM:
-            case Events::CARD_UPDATE_CHECKLIST_ITEM_STATE:
-                $event = new Event\CardChecklistEvent();
-                $event->setCard($this->getCard($data['card']['id']));
-                $event->setChecklist($this->getChecklist($data['checklist']['id']));
-                break;
-            case Events::CARD_CREATE_CHECKLIST:
-            case Events::CARD_UPDATE_CHECKLIST:
-            case Events::CARD_REMOVE_CHECKLIST:
-                $event = new Event\CardChecklistEvent();
-                $event->setCard($this->getCard($data['cardTarget']['_id']));
-                $event->setChecklist($this->getChecklist($data['checklist']['id']));
-                break;
-            case Events::ORGANIZATION_CREATE:
-            case Events::ORGANIZATION_UPDATE:
-                $event = new Event\OrganizationEvent();
-                $event->setOrganization($this->getOrganization($data['organization']['id']));
-                break;
-            case Events::ORGANIZATION_ADD_MEMBER:
-            case Events::ORGANIZATION_MAKE_NORMAL_MEMBER:
-            case Events::ORGANIZATION_REMOVE_ADMIN:
-            case Events::ORGANIZATION_DELETE_INVITATION:
-            case Events::ORGANIZATION_UNCONFIRMED_INVITATION:
-                $event = new Event\OrganizationMemberEvent();
-                $event->setOrganization($this->getOrganization($data['organization']['id']));
-                $event->setMember($this->getMember($data['member']['id']));
-                break;
-            case Events::MEMBER_JOINED:
-            case Events::MEMBER_UPDATE:
-                $event = new Event\MemberEvent();
-                $event->setMember($this->getMember($data['member']['id']));
-                break;
-            case Events::POWERUP_ENABLE:
-            case Events::POWERUP_DISABLE:
-                $event = new Event\PowerUpEvent();
-                $event->setPowerUp($data['powerUp']);
-                break;
             default:
-                throw new InvalidArgumentException(sprintf(
-                    'Unknown event "%s" occured with following data: "%s".',
-                    $eventName,
-                    serialize($data)
-                ));
+                $event = null;
         }
 
-        $event->setRequestData($data);
+        if (null !== $event) {
+            $event->setRequestData($data);
+        }
 
         $this->dispatcher->dispatch($eventName, $event);
     }
